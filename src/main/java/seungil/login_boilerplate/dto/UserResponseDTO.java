@@ -13,4 +13,9 @@ public class UserResponseDTO {
     private UUID id;
     private String userId;
     private String userName;
+
+    public UserResponseDTO(String userId, String userName) {
+        this.userId = userId;
+        this.userName = userName;
+    }
 }

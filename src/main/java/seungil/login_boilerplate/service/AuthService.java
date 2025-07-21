@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import seungil.login_boilerplate.domain.CustomUserDetails;
 import seungil.login_boilerplate.jwt.JwtTokenProvider;
 import org.springframework.security.core.AuthenticationException;
 
@@ -17,20 +18,22 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public HttpHeaders login(String email, String password) {
+    public HttpHeaders login(String userId, String password) {
         try {
             // 인증 수행
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, password));
+                    new UsernamePasswordAuthenticationToken(userId, password));
 
             // 토큰 생성
             String accessToken = jwtTokenProvider.createToken(authentication);
             String refreshToken = jwtTokenProvider.createRefreshToken(authentication);
+            String uuid = ((CustomUserDetails) authentication.getPrincipal()).getId().toString();
 
             // 헤더 설정
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
             headers.add("Refresh-Token", refreshToken);
+            headers.add("userUUID", uuid);
 
             return headers;
         } catch (AuthenticationException e) {

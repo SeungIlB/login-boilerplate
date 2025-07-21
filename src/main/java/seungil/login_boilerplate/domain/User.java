@@ -42,4 +42,10 @@ public class User {
     private boolean accountNonLocked; // 계정 잠김 여부
     private boolean credentialsNonExpired; // 자격 증명 만료 여부
     private boolean enabled; // 계정 활성화 여부
+
+    public void updateUserInfo(String userId, String userName, String encodedPassword) {
+        this.userId = userId;
+        this.userName = userName;
+        this.password = encodedPassword;
+    }
 }
