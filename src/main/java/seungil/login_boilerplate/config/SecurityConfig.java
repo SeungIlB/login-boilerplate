@@ -45,12 +45,11 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/auth/login", "/user/signup", "/").permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
-                        .permitAll() // 로그인 페이지는 누구나 접근 가능
-                )
+                .formLogin(AbstractHttpConfigurer::disable)
                 // JWT 인증 필터 추가
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider,
                         customUserDetailsService), UsernamePasswordAuthenticationFilter.class);
+
         return httpSecurity.build();
     }
 }

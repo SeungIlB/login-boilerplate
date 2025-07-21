@@ -25,15 +25,14 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         // 조회된 사용자 정보를 기반으로 CustomUserDetails 객체 생성 후 반환
         return new CustomUserDetails(
-                user.getUserName(),
-                user.getPassword(),
                 user.getUserId(),
+                user.getPassword(),
+                user.getUserName(),
                 user.isAccountNonExpired(), // 계정 만료 여부
                 user.isAccountNonLocked(), // 계정 잠김 여부
                 user.isCredentialsNonExpired(), // 자격 증명 만료 여부
                 user.isEnabled(), // 계정 활성화 여부
                 Collections.emptyList()
         );
-
     }
 }

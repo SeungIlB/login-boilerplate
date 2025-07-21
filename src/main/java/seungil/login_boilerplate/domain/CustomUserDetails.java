@@ -20,24 +20,23 @@ public class CustomUserDetails implements UserDetails {
     private final boolean enabled; // 계정 활성화 여부
     private final Collection<? extends GrantedAuthority> authorities; // 사용자 권한 목록
 
-
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        return accountNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return accountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
+        return credentialsNonExpired;
     }
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return enabled;
     }
 }

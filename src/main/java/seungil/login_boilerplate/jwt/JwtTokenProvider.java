@@ -6,9 +6,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import seungil.login_boilerplate.domain.CustomUserDetails;
+import seungil.login_boilerplate.repository.JwtTokenRedisRepository;
 
 import java.util.Date;
 import java.util.UUID;
@@ -25,6 +28,10 @@ public class JwtTokenProvider {
 
     @Value("${jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenValiditySeconds;
+
+    private final JwtTokenRedisRepository jwtTokenRedisRepository;
+
+    private final UserDetailsService userDetailsService;
 
     // 주어진 Authentication 객체를 기반으로 JWT 토큰을 생성한다.
     public String createToken(Authentication authentication) {
@@ -77,5 +84,54 @@ public class JwtTokenProvider {
             return bearerToken.substring(7); // Bearer 토큰을 제외한 JWT 토큰 리턴
         }
         return null;
+    }
+
+    // 리프레시 토큰 검증
+    public boolean validateRefreshToken(String refreshToken) {
+        try {
+            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(refreshToken);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // HttpServletRequest에서 Refresh 토큰을 추출
+    public String resolveRefreshToken(HttpServletRequest request) {
+        String refreshToken = request.getHeader("Refresh-Token");
+        return refreshToken;
+    }
+
+
+    // Refresh 토큰을 블랙리스트에 추가하고, 성공적으로 추가되면 true를 반환한다.
+    public boolean blacklistRefreshToken(String refreshToken) {
+        try {
+            String tokenId = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(refreshToken).getBody().getId();
+
+            if (tokenId == null) {
+                throw new IllegalArgumentException("토큰에 jti 클레임이 포함되어 있지 않습니다.");
+            }
+
+            return jwtTokenRedisRepository.addTokenToBlacklist(tokenId, refreshTokenValiditySeconds);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // 블랙리스트에 있는지 확인 (Refresh Token)
+    public boolean isRefreshTokenBlacklisted(String refreshToken) {
+        String tokenId = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(refreshToken).getBody().getId();
+        return jwtTokenRedisRepository.isTokenBlacklisted(tokenId);
+    }
+
+    // Refresh 토큰을 사용하여 새로운 Access 토큰 생성
+    public String createTokenFromRefreshToken(String refreshToken) {
+        if (!validateRefreshToken(refreshToken)) {
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
+
+        String userId = getUserId(refreshToken);
+        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(userId);
+        return generateToken(new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities()), accessTokenValiditySeconds);
     }
 }
