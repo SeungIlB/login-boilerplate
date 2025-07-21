@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Pattern;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
 @AllArgsConstructor
 public class UserRequestDTO {
 
