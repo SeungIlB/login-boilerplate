@@ -1,9 +1,7 @@
 package seungil.login_boilerplate.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,8 +10,9 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Builder
 @RequiredArgsConstructor
-@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
