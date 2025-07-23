@@ -20,6 +20,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
+
 
     public UserResponseDTO signUp(UserRequestDTO userRequestDTO) {
         // 이메일 중복 체크
@@ -30,6 +32,8 @@ public class UserService {
         // 비밀번호 암호화
         String encodedPassword = encodePassword(userRequestDTO.getPassword());
 
+        String verificationToken = UUID.randomUUID().toString();
+
         // 회원 정보 생성
         User user = User.builder()
                 .email(userRequestDTO.getEmail())
@@ -39,8 +43,10 @@ public class UserService {
                 .accountNonLocked(true)
                 .credentialsNonExpired(true)
                 .enabled(true)
+                .mailVerificationToken(verificationToken)
                 .build();
 
+        sendEmail(user.getEmail(), verificationToken, "회원가입 이메일 인증");
         // 회원 저장
         userRepository.save(user);
 
@@ -51,6 +57,26 @@ public class UserService {
     // 이메일 중복 체크 메서드
     public boolean isEmailAlreadyExists(String email){
         return userRepository.existsByEmail(email);
+    }
+
+    // 이메일 전송 메서드
+    private void sendEmail(String email, String verificationToken, String subject) {
+        String verificationUrl = "http://localhost:9090/user/verify/" + verificationToken;
+        mailService.sendEmail(email, verificationUrl, subject);
+    }
+
+    // 이메일 토큰을 사용하여 사용자 조회
+    private User findUserByVerificationToken(String token) {
+        return userRepository.findByMailVerificationToken(token)
+                .orElseThrow(() -> new IllegalStateException("유효한 토큰이 없습니다."));
+    }
+
+    // 이메일 검증
+    public UserResponseDTO verifyEmail(String token) {
+        User user = findUserByVerificationToken(token);
+        user.enableAccount(); // 엔티티 메서드 사용
+        userRepository.save(user);
+        return new UserResponseDTO(user.getEmail(), user.getUserName());
     }
 
     // 비밀번호 암호화 메서드
@@ -69,36 +95,17 @@ public class UserService {
     }
 
     // 회원 정보 수정
-    public UserResponseDTO updateUser(UUID id, UserRequestDTO dto) {
-        return userRepository.findById(id).map(existingUser -> {
-            if (!existingUser.getEmail().equals(dto.getEmail()) && isEmailAlreadyExists(dto.getEmail())) {
-                throw new IllegalStateException("이미 등록된 이메일입니다.");
+    public UserResponseDTO updateUser(UUID userId, UserRequestDTO userRequestDTO) {
+        return userRepository.findById(userId).map(user -> {
+            if (!user.getEmail().equals(userRequestDTO.getEmail())) {
+                verifyEmail(userRequestDTO.getEmail());
             }
+            String verificationToken = UUID.randomUUID().toString();
+            user.updateUser(userRequestDTO, passwordEncoder,verificationToken);
+            sendEmail(user.getEmail(), verificationToken, "회원 정보 수정용 이메일 인증");
 
-            String encodedPassword;
-            if (dto.getPassword() == null || dto.getPassword().isBlank()) {
-                // 변경 안 하는 경우 기존 비밀번호 유지
-                encodedPassword = existingUser.getPassword();
-            } else {
-                // 변경 시 암호화해서 넣기
-                encodedPassword = passwordEncoder.encode(dto.getPassword());
-            }
-
-            User updatedUser = User.builder()
-                    .id(existingUser.getId()) // ID 유지
-                    .email(dto.getEmail())
-                    .password(encodedPassword)
-                    .userName(dto.getUsername())
-                    .created_at(existingUser.getCreated_at()) // 생성일 유지
-                    .updated_at(LocalDateTime.now()) // 수동 갱신
-                    .accountNonExpired(existingUser.isAccountNonExpired())
-                    .accountNonLocked(existingUser.isAccountNonLocked())
-                    .credentialsNonExpired(existingUser.isCredentialsNonExpired())
-                    .enabled(existingUser.isEnabled())
-                    .build();
-
-            userRepository.save(updatedUser);
-            return new UserResponseDTO(updatedUser.getId(), updatedUser.getEmail(), updatedUser.getUserName());
+            userRepository.save(user);
+            return new UserResponseDTO(user.getEmail(), user.getUserName());
         }).orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
     }
 

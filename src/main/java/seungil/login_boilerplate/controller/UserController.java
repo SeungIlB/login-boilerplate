@@ -57,4 +57,17 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+    // 이메일 인증
+    @GetMapping("/verify/{token}")
+    public ResponseEntity<String> verifyEmail(@PathVariable String token) {
+        try {
+            userService.verifyEmail(token);  // 성공 시 내부적으로 상태 저장 처리
+            return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body("유효하지 않은 토큰입니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+        }
+    }
+
 }

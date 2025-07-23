@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import seungil.login_boilerplate.dto.UserRequestDTO;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -42,10 +44,23 @@ public class User {
     private boolean accountNonLocked; // 계정 잠김 여부
     private boolean credentialsNonExpired; // 자격 증명 만료 여부
     private boolean enabled; // 계정 활성화 여부
+    private String mailVerificationToken; // 이메일 인증 토큰
 
-    public void updateUserInfo(String email, String userName, String encodedPassword) {
-        this.email = email;
-        this.userName = userName;
-        this.password = encodedPassword;
+
+    public void updateUser(UserRequestDTO requestDTO, PasswordEncoder passwordEncoder, String mailVerificationToken) {
+        this.userName = requestDTO.getUsername();
+        this.email = requestDTO.getEmail();
+        this.mailVerificationToken = mailVerificationToken;
+        this.enabled = false;
+
+        // 새로운 비밀번호가 null이 아니고, 기존 비밀번호와 다를 때만 인코딩하여 업데이트
+        if (requestDTO.getPassword() != null && !requestDTO.getPassword().equals(this.password)) {
+            this.password = passwordEncoder.encode(requestDTO.getPassword());
+        }
+    }
+
+    public void enableAccount() {
+        this.enabled = true;
+        this.mailVerificationToken = null;
     }
 }
