@@ -9,8 +9,8 @@ import jakarta.validation.constraints.Pattern;
 @AllArgsConstructor
 public class UserRequestDTO {
 
-    @NotBlank(message = "아이디를 입력해주세요")
-    private final String userId;
+    @NotBlank(message = "이메일을 입력해주세요")
+    private final String email;
 
     @NotBlank(message = "비밀번호를 입력해주세요")
     @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$",
@@ -25,7 +25,7 @@ public class UserRequestDTO {
         return "SignUpRequest{" +
                 "username='" + username + '\'' +
                 ", password='[PROTECTED]'" +
-                ", userId='" + userId + '\'' +
+                ", userId='" + email + '\'' +
                 '}';
     }
 }

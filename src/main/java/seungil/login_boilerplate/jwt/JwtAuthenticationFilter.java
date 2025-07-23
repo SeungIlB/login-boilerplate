@@ -31,11 +31,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null) {
             try {
                 if (jwtTokenProvider.validateToken(token)) {
-                    // 통과하면 토큰에서 userId 가져온다.
-                    String userId = jwtTokenProvider.getUserId(token);
+                    // 통과하면 토큰에서 email 가져온다.
+                    String email = jwtTokenProvider.getEmail(token);
 
-                    // userId을 사용해 사용자 정보를 로드
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+                    // 이메일 사용해 사용자 정보를 로드
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
                     // 사용자 정보와 권한을 사용해 인증 객체를 생성
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
@@ -71,7 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setHeader("Authorization", "Bearer " + jwtToken);
 
                 // 새로 발급받은 Access Token으로 UserDetails 로드
-                String email = jwtTokenProvider.getUserId(jwtToken);
+                String email = jwtTokenProvider.getEmail(jwtToken);
                 CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
 
                 // 인증 객체 생성 및 SecurityContext에 설정

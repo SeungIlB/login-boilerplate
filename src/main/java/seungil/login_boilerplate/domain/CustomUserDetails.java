@@ -13,7 +13,7 @@ import java.util.UUID;
 public class CustomUserDetails implements UserDetails {
 
     private final UUID id; // 여기에 UUID 추가
-    private final String userId;
+    private final String email;
     private final String password;
     private final String username;
     private final boolean accountNonExpired; // 계정 만료 여부

@@ -20,7 +20,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestBody UserRequestDTO userRequestDTO) {
         try {
-            HttpHeaders headers = authService.login(userRequestDTO.getUserId(), userRequestDTO.getPassword());
+            HttpHeaders headers = authService.login(userRequestDTO.getEmail(), userRequestDTO.getPassword());
 
             Response response = new Response(HttpStatus.OK.value(),  "로그인에 성공했습니다.");
 

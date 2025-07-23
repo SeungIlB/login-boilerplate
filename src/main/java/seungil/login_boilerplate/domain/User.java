@@ -24,7 +24,7 @@ public class User {
     private UUID id;
 
     @Column(nullable = false)
-    private String userId;
+    private String email;
 
     @Column(nullable = false)
     private String password;
@@ -43,8 +43,8 @@ public class User {
     private boolean credentialsNonExpired; // 자격 증명 만료 여부
     private boolean enabled; // 계정 활성화 여부
 
-    public void updateUserInfo(String userId, String userName, String encodedPassword) {
-        this.userId = userId;
+    public void updateUserInfo(String email, String userName, String encodedPassword) {
+        this.email = email;
         this.userName = userName;
         this.password = encodedPassword;
     }

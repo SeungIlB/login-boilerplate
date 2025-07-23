@@ -11,11 +11,11 @@ import java.util.UUID;
 public class UserResponseDTO {
 
     private UUID id;
-    private String userId;
+    private String email;
     private String userName;
 
-    public UserResponseDTO(String userId, String userName) {
-        this.userId = userId;
+    public UserResponseDTO(String email, String userName) {
+        this.email = email;
         this.userName = userName;
     }
 }

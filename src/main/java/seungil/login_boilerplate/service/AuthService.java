@@ -18,11 +18,11 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public HttpHeaders login(String userId, String password) {
+    public HttpHeaders login(String email, String password) {
         try {
             // 인증 수행
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userId, password));
+                    new UsernamePasswordAuthenticationToken(email, password));
 
             // 토큰 생성
             String accessToken = jwtTokenProvider.createToken(authentication);

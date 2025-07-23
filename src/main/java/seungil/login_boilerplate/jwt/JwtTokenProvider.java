@@ -45,7 +45,7 @@ public class JwtTokenProvider {
     // JWT 토큰 생성
     private String generateToken(Authentication authentication, long validitySeconds) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        Claims claims = Jwts.claims().setSubject(userDetails.getUserId());
+        Claims claims = Jwts.claims().setSubject(userDetails.getEmail());
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + validitySeconds * 1000);
@@ -73,7 +73,7 @@ public class JwtTokenProvider {
     }
 
     // JWT 토큰에서 사용자 이름을 추출
-    public String getUserId(String token) {
+    public String getEmail(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
@@ -130,8 +130,8 @@ public class JwtTokenProvider {
             throw new IllegalArgumentException("Invalid refresh token");
         }
 
-        String userId = getUserId(refreshToken);
-        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(userId);
+        String email = getEmail(refreshToken);
+        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
         return generateToken(new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities()), accessTokenValiditySeconds);
     }
 }

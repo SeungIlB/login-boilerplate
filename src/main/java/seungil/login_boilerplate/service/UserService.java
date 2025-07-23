@@ -5,7 +5,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import seungil.login_boilerplate.domain.User;
-import seungil.login_boilerplate.dto.UpdateUserDTO;
 import seungil.login_boilerplate.dto.UserRequestDTO;
 import seungil.login_boilerplate.dto.UserResponseDTO;
 import seungil.login_boilerplate.repository.UserRepository;
@@ -23,9 +22,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public UserResponseDTO signUp(UserRequestDTO userRequestDTO) {
-        // userId 중복 체크
-        if (isUserIdAlreadyExists(userRequestDTO.getUserId())) {
-            throw new IllegalStateException("이미 등록된 사용자Id 입니다.");
+        // 이메일 중복 체크
+        if (isEmailAlreadyExists(userRequestDTO.getEmail())) {
+            throw new IllegalStateException("이미 등록된 이메일 입니다.");
         }
 
         // 비밀번호 암호화
@@ -33,7 +32,7 @@ public class UserService {
 
         // 회원 정보 생성
         User user = User.builder()
-                .userId(userRequestDTO.getUserId())
+                .email(userRequestDTO.getEmail())
                 .userName(userRequestDTO.getUsername())
                 .password(encodedPassword)
                 .accountNonExpired(true)
@@ -46,12 +45,12 @@ public class UserService {
         userRepository.save(user);
 
         // UserResponseDTO 생성
-        return new UserResponseDTO(user.getId(), user.getUserName(), user.getUserId());
+        return new UserResponseDTO(user.getId(), user.getUserName(), user.getEmail());
     }
 
-    // userId 중복 체크 메서드
-    public boolean isUserIdAlreadyExists(String userId) {
-        return userRepository.existsByUserId(userId);
+    // 이메일 중복 체크 메서드
+    public boolean isEmailAlreadyExists(String email){
+        return userRepository.existsByEmail(email);
     }
 
     // 비밀번호 암호화 메서드
@@ -63,7 +62,7 @@ public class UserService {
     public UserResponseDTO getUserById(UUID userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isPresent()) {
-            return new UserResponseDTO(user.get().getId(), user.get().getUserId(), user.get().getUserName());
+            return new UserResponseDTO(user.get().getId(), user.get().getEmail(), user.get().getUserName());
         } else {
             throw new IllegalStateException("사용자를 찾을 수 없습니다.");
         }
@@ -72,8 +71,8 @@ public class UserService {
     // 회원 정보 수정
     public UserResponseDTO updateUser(UUID id, UserRequestDTO dto) {
         return userRepository.findById(id).map(existingUser -> {
-            if (!existingUser.getUserId().equals(dto.getUserId()) && isUserIdAlreadyExists(dto.getUserId())) {
-                throw new IllegalStateException("이미 등록된 userId입니다.");
+            if (!existingUser.getEmail().equals(dto.getEmail()) && isEmailAlreadyExists(dto.getEmail())) {
+                throw new IllegalStateException("이미 등록된 이메일입니다.");
             }
 
             String encodedPassword;
@@ -87,7 +86,7 @@ public class UserService {
 
             User updatedUser = User.builder()
                     .id(existingUser.getId()) // ID 유지
-                    .userId(dto.getUserId())
+                    .email(dto.getEmail())
                     .password(encodedPassword)
                     .userName(dto.getUsername())
                     .created_at(existingUser.getCreated_at()) // 생성일 유지
@@ -99,7 +98,7 @@ public class UserService {
                     .build();
 
             userRepository.save(updatedUser);
-            return new UserResponseDTO(updatedUser.getId(), updatedUser.getUserId(), updatedUser.getUserName());
+            return new UserResponseDTO(updatedUser.getId(), updatedUser.getEmail(), updatedUser.getUserName());
         }).orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
     }
 
