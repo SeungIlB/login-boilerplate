@@ -21,21 +21,27 @@ public class CustomUserDetailsService implements UserDetailsService {
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final int LOCKOUT_MINUTES = 1;
 
+    @Override // userId을 기준으로 사용자를 로드하는 메서드
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        // 이메일로 사용자 조회
+        User user = userRepository.findByEmail(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 userId를 가진 사용자를 찾을 수 없습니다: " + userId));
 
-    @Override
-    public UserDetails loadUserByUsername(String email) {
-        User user = findUserByEmail(email);
-
-        // 잠금 해제 처리
-        if (!user.isAccountNonLocked() && user.isLockTimeExpired(LOCKOUT_MINUTES)) {
-            user.unlockAccount();
-            user.resetFailedLoginAttempts();
-            userRepository.save(user);
-        }
-
-        return new CustomUserDetails(user);
+        // 조회된 사용자 정보를 기반으로 CustomUserDetails 객체 생성 후 반환
+        return new CustomUserDetails(
+                user.getId(),         // UUID 추가
+                user.getEmail(),
+                user.getPassword(),
+                user.getUserName(),
+                user.isAccountNonExpired(),
+                user.isAccountNonLocked(),
+                user.isCredentialsNonExpired(),
+                user.isEnabled(),
+                user.getFailedLoginAttempts(),
+                user.getLockTime(),
+                Collections.emptyList()
+        );
     }
-
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 이메일을 가진 사용자를 찾을 수 없습니다."));
@@ -79,5 +85,4 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(attempts -> MAX_FAILED_ATTEMPTS - attempts + 1)
                 .orElse(1);
     }
-}
 }

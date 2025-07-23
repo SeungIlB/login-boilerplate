@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import seungil.login_boilerplate.dto.LoginDTO;
 import seungil.login_boilerplate.dto.UserRequestDTO;
 import seungil.login_boilerplate.exception.UserAccountLockedException;
 import seungil.login_boilerplate.exception.UserNotEnabledException;
@@ -22,9 +23,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody UserRequestDTO userRequestDTO) {
+    public ResponseEntity<String> login(@Valid @RequestBody LoginDTO loginDTO) {
         try {
-            HttpHeaders headers = authService.login(userRequestDTO.getEmail(), userRequestDTO.getPassword());
+            HttpHeaders headers = authService.login(loginDTO.getEmail(), loginDTO.getPassword());
             return ResponseEntity.ok()
                     .headers(headers)
                     .body("로그인에 성공했습니다.");
@@ -35,7 +36,7 @@ public class AuthController {
         } catch (UserAccountLockedException e) {
             return ResponseEntity.status(HttpStatus.LOCKED).body(e.getMessage());
         } catch (AuthenticationException e) {
-            int remainingAttempts = authService.getRemainingLoginAttempts(userRequestDTO.getEmail());
+            int remainingAttempts = authService.getRemainingLoginAttempts(loginDTO.getEmail());
             String message = "이메일 주소나 비밀번호가 올바르지 않습니다. " +
                     remainingAttempts + "번 더 로그인에 실패하면 계정이 잠길 수 있습니다.";
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(message);

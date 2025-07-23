@@ -61,7 +61,7 @@ public class UserService {
 
     // 이메일 전송 메서드
     private void sendEmail(String email, String verificationToken, String subject) {
-        String verificationUrl = "http://localhost:9090/user/verify/" + verificationToken;
+        String verificationUrl = "http://localhost:9080/user/verify/" + verificationToken;
         mailService.sendEmail(email, verificationUrl, subject);
     }
 
