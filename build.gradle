@@ -51,6 +51,9 @@ dependencies {
 	// Redis 의존성 추가
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+	// JavaMailSender
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
 	// 테스트
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
