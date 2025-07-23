@@ -20,6 +20,21 @@ public class CustomUserDetails implements UserDetails {
     private final boolean accountNonLocked; // 계정 잠김 여부
     private final boolean credentialsNonExpired; // 자격 증명 만료 여부
     private final boolean enabled; // 계정 활성화 여부
+    private final User user;
+
+    public CustomUserDetails(UUID id, String email, String password, String username, boolean accountNonExpired, boolean accountNonLocked, boolean credentialsNonExpired, boolean enabled, User user, Collection<? extends GrantedAuthority> authorities) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.username = username;
+        this.accountNonExpired = accountNonExpired;
+        this.accountNonLocked = accountNonLocked;
+        this.credentialsNonExpired = credentialsNonExpired;
+        this.enabled = enabled;
+        this.user = user;
+        this.authorities = authorities;
+    }
+
     private final Collection<? extends GrantedAuthority> authorities; // 사용자 권한 목록
 
     @Override
