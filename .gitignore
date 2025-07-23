@@ -136,7 +136,7 @@ cmake-build-*/
 
 # IntelliJ
 out/
-application.properties
+src/main/resources/application.properties
 .env
 
 
