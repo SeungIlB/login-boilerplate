@@ -39,6 +39,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.isEnabled(),
                 user.getFailedLoginAttempts(),
                 user.getLockTime(),
+                user.getSocialType(),
+                user.getSocialId(),
                 Collections.emptyList()
         );
     }
