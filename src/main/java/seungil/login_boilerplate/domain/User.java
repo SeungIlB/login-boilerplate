@@ -32,7 +32,7 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private String userName;
+    private String username;
 
     @CreationTimestamp // INSERT 쿼리가 발생할 때, 현재 시간을 자동으로 저장
     private LocalDateTime created_at; // 회원가입한 시간
@@ -50,7 +50,7 @@ public class User {
 
 
     public void updateUser(UserRequestDTO requestDTO, PasswordEncoder passwordEncoder, String mailVerificationToken) {
-        this.userName = requestDTO.getUsername();
+        this.username = requestDTO.getUsername();
         this.email = requestDTO.getEmail();
         this.mailVerificationToken = mailVerificationToken;
         this.enabled = false;
